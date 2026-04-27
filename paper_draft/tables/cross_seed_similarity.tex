@@ -1,0 +1,28 @@
+\begin{table*}[t]
+    \centering
+    \small
+    \caption{Same-depth versus off-depth similarity across random seeds. Positive differences mean the same hidden depth recurs across seeds more strongly than mismatched depths. The strongest positive difference for each dataset is in \textbf{bold}.}
+    \label{tab:cross_seed_similarity}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}llccccc@{}}
+        \toprule
+        \textsc{Dataset} & \textsc{Metric} & Same-Depth Mean & Off-Depth Mean & Difference & $p$-value & Cohen's $d$ \\
+        \midrule
+        \cifar & \cka & 0.9359 & 0.8576 & \textbf{0.0783} & 0.0008 & 1.41 \\
+        \cifar & Cosine & 0.3211 & 0.3020 & 0.0191 & 0.4993 & 0.19 \\
+        \cifar & \pwcca & 0.8878 & 0.8887 & -0.0010 & 0.6237 & -0.14 \\
+        \cifar & \svcca & 0.6715 & 0.7018 & -0.0303 & 0.1194 & -0.48 \\
+        \midrule
+        \fashionmnist & \cka & 0.9160 & 0.8777 & \textbf{0.0383} & 0.0378 & 0.73 \\
+        \fashionmnist & Cosine & 0.4051 & 0.4137 & -0.0086 & 0.4265 & -0.24 \\
+        \fashionmnist & \pwcca & 0.9411 & 0.9254 & 0.0158 & 0.1400 & 0.47 \\
+        \fashionmnist & \svcca & 0.6954 & 0.6761 & 0.0193 & 0.0018 & 0.87 \\
+        \midrule
+        \mnist & \cka & 0.9560 & 0.9234 & \textbf{0.0326} & 0.0014 & 0.84 \\
+        \mnist & Cosine & 0.4562 & 0.4696 & -0.0134 & 0.4579 & -0.20 \\
+        \mnist & \pwcca & 0.9166 & 0.9078 & 0.0089 & 0.3583 & 0.26 \\
+        \mnist & \svcca & 0.6818 & 0.6568 & 0.0250 & 0.0014 & 0.98 \\
+        \bottomrule
+    \end{tabular}%
+    }
+\end{table*}

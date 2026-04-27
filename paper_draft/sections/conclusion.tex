@@ -1,0 +1,8 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented a controlled benchmark of hidden-state similarity in plain four-layer MLPs trained on \mnist, \fashionmnist, and \cifar. By combining linear \cka, \svcca, \pwcca, cosine similarity, and per-layer linear probes, we separated within-model layer locality from cross-seed recurrence and from task-information growth with depth.
+
+Our main finding is simple: MLP hidden spaces across depth are not totally different. Adjacent layers are consistently more similar than distant ones, while later layers usually improve decodable label information. Cross-seed comparisons are weaker, which shows that representational continuity within a model is easier to establish than stable layer identity across random initializations.
+
+The next steps are straightforward. Functional stitching can test whether these similarities support interchangeable computation. Additional sweeps over width, depth, and pre- versus post-activation representations can identify when progressive similarity stops holding. Extending the same protocol to residual networks and transformers would clarify how architecture changes the geometry of layer-wise progression.

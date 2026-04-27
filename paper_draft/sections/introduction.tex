@@ -1,0 +1,22 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Hidden-state similarity is not a side question. Interpretability, pruning, model surgery, and transfer arguments all become easier to justify if intermediate layers refine a shared representation instead of rebuilding a new feature basis from scratch at every step. Our main question is therefore direct: when a plain multilayer perceptron processes an input through depth, do its hidden states become totally different, or do they remain comparable in measurable ways?
+
+This question matters because many practical analyses assume some form of continuity across depth. If adjacent layers preserve substantial shared structure, then layer-wise comparisons, lightweight editing, and partial model reuse have a stronger empirical foundation. If they do not, then similarity-based claims about representational progression become much harder to defend.
+
+Existing tools for representation comparison are mature. \svcca studies compare dominant subspaces across layers and checkpoints \cite{raghu2017svcca}. Linear \cka was proposed in part because correspondence tests exposed failure modes for CCA-style methods in high-dimensional settings \cite{kornblith2019similarity}. Later work broadened the picture by separating geometric similarity from functional compatibility \cite{csiszarik2021similarity}, questioning how reliable \cka is under distributional shifts and feature manipulations \cite{davari2023reliability}, and clarifying what common similarity measures imply about linear decoders \cite{harvey2024decodable}. However, the recent empirical emphasis has been stronger for convolutional networks and transformers than for controlled plain-MLP studies.
+
+We focus on that gap. We train the same four-hidden-layer ReLU MLP on three standard image benchmarks of increasing difficulty, compare hidden activations with four complementary metrics, and add linear probes as a task-information sanity check. This design lets us separate three questions: whether nearby layers are geometrically closer than distant ones, whether the same layer role recurs across random seeds, and whether deeper layers improve linearly decodable information even when they remain similar to earlier layers.
+
+\para{What do we find?} The answer is consistent within models and mixed across seeds. Adjacent layers are more similar than non-adjacent layers in all 12 dataset-metric comparisons, with 10 significant at $p<0.05$. Same-depth cross-seed similarity beats off-depth similarity in only 8 of 12 cases. Linear probes improve with depth on \mnist and \fashionmnist, and peak at layer 3 on \cifar. Taken together, these results support a progressive-transformation view of MLP depth rather than a complete rewriting view.
+
+Our contributions are:
+\begin{itemize}
+    \item We conduct a controlled multi-metric benchmark of hidden-state similarity in plain feedforward MLPs on \mnist, \fashionmnist, and \cifar.
+    \item We compare within-model layer locality and cross-seed same-depth recurrence, which separates representational continuity from seed-specific alignment.
+    \item We complement geometric similarity scores with linear probes, showing that later layers can improve decodable task information while remaining substantially similar to earlier ones.
+    \item We provide a concrete empirical answer: MLP hidden states are not totally different across depth, but the strength of that claim depends on the metric and is strongest within a single trained model.
+\end{itemize}
+
+The rest of the paper is organized as follows. \Secref{sec:related_work} situates the study in prior work on representation similarity. \Secref{sec:methodology} describes the training setup, similarity measures, and statistical comparisons. \Secref{sec:results} reports the main empirical results, and \Secref{sec:discussion} discusses interpretation, limitations, and broader implications.

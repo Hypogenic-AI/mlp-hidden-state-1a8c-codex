@@ -1,0 +1,28 @@
+\begin{table*}[t]
+    \centering
+    \small
+    \caption{Adjacent-layer versus non-adjacent-layer similarity within the same trained model. Positive differences mean nearby layers are more similar. The largest positive difference for each dataset is in \textbf{bold}.}
+    \label{tab:within_model_similarity}
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{@{}llccccc@{}}
+        \toprule
+        \textsc{Dataset} & \textsc{Metric} & Adjacent Mean & Non-Adjacent Mean & Difference & $p$-value & Cohen's $d$ \\
+        \midrule
+        \cifar & \cka & \textbf{0.9540} & 0.8335 & \textbf{0.1206} & 0.0002 & 2.43 \\
+        \cifar & Cosine & 0.3334 & 0.2885 & 0.0449 & 0.0048 & 0.75 \\
+        \cifar & \pwcca & 0.9361 & 0.9004 & 0.0357 & 0.0002 & 1.99 \\
+        \cifar & \svcca & 0.7674 & 0.7305 & 0.0369 & 0.0322 & 0.56 \\
+        \midrule
+        \fashionmnist & \cka & \textbf{0.9703} & 0.9028 & \textbf{0.0674} & 0.0002 & 2.09 \\
+        \fashionmnist & Cosine & 0.4166 & 0.4063 & 0.0103 & 0.2280 & 0.30 \\
+        \fashionmnist & \pwcca & 0.9591 & 0.9254 & 0.0338 & 0.0002 & 1.23 \\
+        \fashionmnist & \svcca & 0.7499 & 0.6841 & 0.0658 & 0.0002 & 2.37 \\
+        \midrule
+        \mnist & \cka & 0.9793 & 0.9253 & 0.0540 & 0.0002 & 1.85 \\
+        \mnist & Cosine & 0.4780 & 0.4636 & 0.0144 & 0.0634 & 0.46 \\
+        \mnist & \pwcca & 0.9400 & 0.9161 & 0.0239 & 0.0002 & 1.22 \\
+        \mnist & \svcca & \textbf{0.7271} & 0.6591 & \textbf{0.0680} & 0.0002 & 3.18 \\
+        \bottomrule
+    \end{tabular}%
+    }
+\end{table*}

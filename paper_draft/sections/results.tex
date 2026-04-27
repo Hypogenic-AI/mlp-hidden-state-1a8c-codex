@@ -1,0 +1,41 @@
+\section{Results}
+\label{sec:results}
+
+\para{Base task performance.} The shared architecture reaches mean test accuracy $0.9270$ on \mnist, $0.8228$ on \fashionmnist, and $0.3937$ on \cifar, which establishes a simple but non-trivial benchmark across task difficulty. Best-seed performance follows the same ranking, with \mnist easiest and \cifar hardest.
+
+\begin{figure}[t]
+    \centering
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/mnist_distance_trend.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/fashion_mnist_distance_trend.png}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{0.32\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/cifar10_distance_trend.png}
+    \end{minipage}
+    \caption{Within-model similarity declines with layer distance across all three datasets. The same locality pattern appears with different absolute scales, with the cleanest separation under \cka, \svcca, and \pwcca.}
+    \label{fig:distance_trends}
+\end{figure}
+
+\para{Within-model locality is the dominant result.} \Tabref{tab:within_model_similarity} shows that adjacent layers are more similar than non-adjacent layers in all 12 dataset-metric comparisons. The effect is strongest and most stable for \cka, \svcca, and \pwcca. For example, on \cifar, adjacent-layer \cka exceeds non-adjacent \cka by $0.1206$ with $p=0.0002$ and Cohen's $d=2.43$. The same qualitative pattern appears on \mnist and \fashionmnist. Cosine similarity is directionally consistent everywhere, but its weaker margins on \mnist and \fashionmnist do not reach $p<0.05$.
+
+\input{tables/within_model_similarity}
+
+\para{Cross-seed layer recurrence is weaker.} \Tabref{tab:cross_seed_similarity} reports same-depth versus off-depth similarity across random seeds. Here the story is mixed: 8 of 12 comparisons favor same-depth alignment, but only 5 are statistically significant. \cka remains the most consistent metric, showing positive and significant same-depth gaps on all three datasets. By contrast, cosine is inconsistent, and both \pwcca and \svcca become weak or negative on \cifar. This means that the claim ``layers are comparable'' is empirically stronger within a single model than across independent initializations.
+
+\input{tables/cross_seed_similarity}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.78\linewidth]{figures/probe_accuracy_by_layer.png}
+    \caption{Linear probe accuracy by hidden layer. Later layers usually improve decodable task information, although the strongest gain on \cifar appears at layer 3 rather than layer 4.}
+    \label{fig:probe_accuracy}
+\end{figure}
+
+\para{Later layers improve linear decodability.} \Figref{fig:probe_accuracy} complements the geometric results with a task-information view. On \mnist, mean probe accuracy rises from $0.8767$ at layer 1 to {\bf $0.9108$} at layer 4. On \fashionmnist, the best mean accuracy is {\bf $0.8450$} at layers 3 and 4, up from $0.8308$ at layer 1. On \cifar, the best layer is layer 3 with {\bf $0.4292$}, compared with $0.4100$ at layer 1. These gains are modest compared with the overall class difficulty, but they are consistent with a refinement view of depth: later layers improve linearly decodable information while still remaining similar to earlier layers.
+
+\para{Ablation by metric.} The comparison across metrics is itself an informative ablation. \cka, \svcca, and \pwcca all support the progressive-transformation picture within models, while cosine provides the same direction with less stability. Across seeds, only \cka remains consistently positive across datasets. This pattern suggests that metric choice is not a cosmetic decision; it changes how strongly one should believe claims about recurring layer roles across training runs.

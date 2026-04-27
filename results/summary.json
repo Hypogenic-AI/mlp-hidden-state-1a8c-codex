@@ -1,0 +1,343 @@
+{
+  "test_accuracy_summary": [
+    {
+      "dataset": "cifar10",
+      "mean": 0.3937,
+      "std": 0.0033,
+      "min": 0.39,
+      "max": 0.3965
+    },
+    {
+      "dataset": "fashion_mnist",
+      "mean": 0.8228,
+      "std": 0.0098,
+      "min": 0.812,
+      "max": 0.831
+    },
+    {
+      "dataset": "mnist",
+      "mean": 0.927,
+      "std": 0.0039,
+      "min": 0.9245,
+      "max": 0.9315
+    }
+  ],
+  "distance_summary": [
+    {
+      "dataset": "cifar10",
+      "metric": "cka",
+      "adjacent_mean": 0.9540401697158813,
+      "non_adjacent_mean": 0.8334801461961534,
+      "adjacent_ci_low": 0.9512072801589966,
+      "adjacent_ci_high": 0.9568169112006824,
+      "difference": 0.12056002351972794,
+      "cohens_d": 2.4336813890855526,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "cosine",
+      "adjacent_mean": 0.3334464314911101,
+      "non_adjacent_mean": 0.2885194934076733,
+      "adjacent_ci_low": 0.30488633107807905,
+      "adjacent_ci_high": 0.3607795348804858,
+      "difference": 0.044926938083436785,
+      "cohens_d": 0.7504376593527698,
+      "p_value": 0.004799040191961607
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "pwcca",
+      "adjacent_mean": 0.9360817449938177,
+      "non_adjacent_mean": 0.9003597021262624,
+      "adjacent_ci_low": 0.9294661963285009,
+      "adjacent_ci_high": 0.9430402817683564,
+      "difference": 0.035722042867555315,
+      "cohens_d": 1.9851498549285813,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "svcca",
+      "adjacent_mean": 0.7674212422427629,
+      "non_adjacent_mean": 0.7305032012924677,
+      "adjacent_ci_low": 0.7379079350308243,
+      "adjacent_ci_high": 0.8004362160045114,
+      "difference": 0.03691804095029516,
+      "cohens_d": 0.5620940251283522,
+      "p_value": 0.03219356128774245
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "cka",
+      "adjacent_mean": 0.9702732695473565,
+      "non_adjacent_mean": 0.9028329849243164,
+      "adjacent_ci_low": 0.9673622346586651,
+      "adjacent_ci_high": 0.9730541682905621,
+      "difference": 0.06744028462304008,
+      "cohens_d": 2.090771596382999,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "cosine",
+      "adjacent_mean": 0.4166320363680522,
+      "non_adjacent_mean": 0.4063028660085466,
+      "adjacent_ci_low": 0.40219019038809667,
+      "adjacent_ci_high": 0.43122517971528895,
+      "difference": 0.01032917035950559,
+      "cohens_d": 0.2968363192771002,
+      "p_value": 0.22795440911817635
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "pwcca",
+      "adjacent_mean": 0.959141598161269,
+      "non_adjacent_mean": 0.9253782658456322,
+      "adjacent_ci_low": 0.9510899912111863,
+      "adjacent_ci_high": 0.9671970554764715,
+      "difference": 0.033763332315636774,
+      "cohens_d": 1.2341931050742485,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "svcca",
+      "adjacent_mean": 0.7499100517010019,
+      "non_adjacent_mean": 0.6840797884181886,
+      "adjacent_ci_low": 0.7424443010329608,
+      "adjacent_ci_high": 0.757628493618597,
+      "difference": 0.06583026328281327,
+      "cohens_d": 2.368810907138617,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "mnist",
+      "metric": "cka",
+      "adjacent_mean": 0.9792594247394137,
+      "non_adjacent_mean": 0.9252966774834527,
+      "adjacent_ci_low": 0.9733787353667948,
+      "adjacent_ci_high": 0.9847516073948808,
+      "difference": 0.05396274725596106,
+      "cohens_d": 1.852450597940622,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "mnist",
+      "metric": "cosine",
+      "adjacent_mean": 0.47796285814709133,
+      "non_adjacent_mean": 0.4635857409901089,
+      "adjacent_ci_low": 0.46421940906180276,
+      "adjacent_ci_high": 0.49237372237775057,
+      "difference": 0.014377117156982422,
+      "cohens_d": 0.46321998028065897,
+      "p_value": 0.0633873225354929
+    },
+    {
+      "dataset": "mnist",
+      "metric": "pwcca",
+      "adjacent_mean": 0.9400128290945866,
+      "non_adjacent_mean": 0.9161247336305139,
+      "adjacent_ci_low": 0.930265558854479,
+      "adjacent_ci_high": 0.9486295801320724,
+      "difference": 0.023888095464072667,
+      "cohens_d": 1.2241902821400292,
+      "p_value": 0.0001999600079984003
+    },
+    {
+      "dataset": "mnist",
+      "metric": "svcca",
+      "adjacent_mean": 0.7271326821951862,
+      "non_adjacent_mean": 0.6590986191906092,
+      "adjacent_ci_low": 0.7239122738845204,
+      "adjacent_ci_high": 0.7305457616390433,
+      "difference": 0.06803406300457704,
+      "cohens_d": 3.1813611982710115,
+      "p_value": 0.0001999600079984003
+    }
+  ],
+  "cross_seed_summary": [
+    {
+      "dataset": "cifar10",
+      "metric": "cka",
+      "same_depth_mean": 0.9359193841616312,
+      "off_depth_mean": 0.8575930462943183,
+      "difference": 0.07832633786731291,
+      "cohens_d": 1.4119340222364125,
+      "p_value": 0.0007998400319936012
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "cosine",
+      "same_depth_mean": 0.32114681974053383,
+      "off_depth_mean": 0.30200542219811016,
+      "difference": 0.019141397542423666,
+      "cohens_d": 0.19374233761010887,
+      "p_value": 0.4993001399720056
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "pwcca",
+      "same_depth_mean": 0.8877759907754887,
+      "off_depth_mean": 0.888726860460028,
+      "difference": -0.0009508696845392794,
+      "cohens_d": -0.14374395453490507,
+      "p_value": 0.6236752649470106
+    },
+    {
+      "dataset": "cifar10",
+      "metric": "svcca",
+      "same_depth_mean": 0.6714834732258002,
+      "off_depth_mean": 0.701785380219815,
+      "difference": -0.030301906994014804,
+      "cohens_d": -0.484622591824607,
+      "p_value": 0.11937612477504499
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "cka",
+      "same_depth_mean": 0.9159641563892365,
+      "off_depth_mean": 0.877707893649737,
+      "difference": 0.03825626273949945,
+      "cohens_d": 0.7250087298641315,
+      "p_value": 0.03779244151169766
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "cosine",
+      "same_depth_mean": 0.405079481502374,
+      "off_depth_mean": 0.4137209579348564,
+      "difference": -0.00864147643248242,
+      "cohens_d": -0.23650865745505897,
+      "p_value": 0.42651469706058787
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "pwcca",
+      "same_depth_mean": 0.9411488312075228,
+      "off_depth_mean": 0.9253920918079014,
+      "difference": 0.01575673939962141,
+      "cohens_d": 0.46615836250054365,
+      "p_value": 0.13997200559888023
+    },
+    {
+      "dataset": "fashion_mnist",
+      "metric": "svcca",
+      "same_depth_mean": 0.6954308494103771,
+      "off_depth_mean": 0.6761334832189666,
+      "difference": 0.019297366191410537,
+      "cohens_d": 1.130816544785516,
+      "p_value": 0.001799640071985603
+    },
+    {
+      "dataset": "mnist",
+      "metric": "cka",
+      "same_depth_mean": 0.9560454487800598,
+      "off_depth_mean": 0.9234029865927167,
+      "difference": 0.032642462187343124,
+      "cohens_d": 1.1749748228604648,
+      "p_value": 0.0013997200559888023
+    },
+    {
+      "dataset": "mnist",
+      "metric": "cosine",
+      "same_depth_mean": 0.45615948736667633,
+      "off_depth_mean": 0.4695901953511768,
+      "difference": -0.013430707984500467,
+      "cohens_d": -0.22572610412146832,
+      "p_value": 0.4579084183163367
+    },
+    {
+      "dataset": "mnist",
+      "metric": "pwcca",
+      "same_depth_mean": 0.9166494226141363,
+      "off_depth_mean": 0.9077690233427066,
+      "difference": 0.008880399271429695,
+      "cohens_d": 0.28039841036513063,
+      "p_value": 0.3583283343331334
+    },
+    {
+      "dataset": "mnist",
+      "metric": "svcca",
+      "same_depth_mean": 0.6817691032709822,
+      "off_depth_mean": 0.6568092363190392,
+      "difference": 0.024959866951942966,
+      "cohens_d": 1.118379918908212,
+      "p_value": 0.0013997200559888023
+    }
+  ],
+  "probe_summary": [
+    {
+      "dataset": "cifar10",
+      "layer": 1,
+      "mean": 0.41,
+      "std": 0.0198
+    },
+    {
+      "dataset": "cifar10",
+      "layer": 2,
+      "mean": 0.4183,
+      "std": 0.0123
+    },
+    {
+      "dataset": "cifar10",
+      "layer": 3,
+      "mean": 0.4292,
+      "std": 0.0038
+    },
+    {
+      "dataset": "cifar10",
+      "layer": 4,
+      "mean": 0.4217,
+      "std": 0.008
+    },
+    {
+      "dataset": "fashion_mnist",
+      "layer": 1,
+      "mean": 0.8308,
+      "std": 0.0038
+    },
+    {
+      "dataset": "fashion_mnist",
+      "layer": 2,
+      "mean": 0.8308,
+      "std": 0.0126
+    },
+    {
+      "dataset": "fashion_mnist",
+      "layer": 3,
+      "mean": 0.845,
+      "std": 0.0075
+    },
+    {
+      "dataset": "fashion_mnist",
+      "layer": 4,
+      "mean": 0.845,
+      "std": 0.0043
+    },
+    {
+      "dataset": "mnist",
+      "layer": 1,
+      "mean": 0.8767,
+      "std": 0.0166
+    },
+    {
+      "dataset": "mnist",
+      "layer": 2,
+      "mean": 0.905,
+      "std": 0.0025
+    },
+    {
+      "dataset": "mnist",
+      "layer": 3,
+      "mean": 0.9083,
+      "std": 0.0058
+    },
+    {
+      "dataset": "mnist",
+      "layer": 4,
+      "mean": 0.9108,
+      "std": 0.0014
+    }
+  ]
+}

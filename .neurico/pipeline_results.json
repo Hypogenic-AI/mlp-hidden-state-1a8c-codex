@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "stages": {
+    "resource_finder": {
+      "success": true,
+      "completion_marker": "/workspaces/mlp-hidden-state-1a8c-codex/.resource_finder_complete",
+      "outputs": {
+        "literature_review": "/workspaces/mlp-hidden-state-1a8c-codex/literature_review.md",
+        "resources_catalog": "/workspaces/mlp-hidden-state-1a8c-codex/resources.md",
+        "papers_dir": "/workspaces/mlp-hidden-state-1a8c-codex/papers",
+        "datasets_dir": "/workspaces/mlp-hidden-state-1a8c-codex/datasets",
+        "code_dir": "/workspaces/mlp-hidden-state-1a8c-codex/code"
+      },
+      "log_file": "/workspaces/mlp-hidden-state-1a8c-codex/logs/resource_finder_codex.log",
+      "transcript_file": "/workspaces/mlp-hidden-state-1a8c-codex/logs/resource_finder_codex_transcript.jsonl",
+      "elapsed_time": 448.3037791252136
+    },
+    "experiment_runner": {
+      "success": true,
+      "return_code": 0,
+      "elapsed_time": 756.4024827480316,
+      "log_file": "/workspaces/mlp-hidden-state-1a8c-codex/logs/execution_codex.log",
+      "transcript_file": "/workspaces/mlp-hidden-state-1a8c-codex/logs/execution_codex_transcript.jsonl"
+    }
+  },
+  "work_dir": "/workspaces/mlp-hidden-state-1a8c-codex"
+}

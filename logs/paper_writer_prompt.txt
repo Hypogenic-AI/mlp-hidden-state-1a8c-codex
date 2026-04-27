@@ -1,0 +1,645 @@
+You are an academic paper writer. Generate a complete NEURIPS style paper
+based on the experiment results provided.
+
+════════════════════════════════════════════════════════════════════════════════
+                         IMPORTANT: BEFORE YOU START
+════════════════════════════════════════════════════════════════════════════════
+
+Before writing any content, you MUST complete these steps:
+
+1. READ THE SKILL: Review the paper-writer skill at .codex/skills/paper-writer/SKILL.md
+2. READ THE STYLE GUIDE: Study templates/paper_writing/lab_style_guide.md carefully
+3. REVIEW EXAMPLES: Browse paper_examples/ for formatting and language patterns:
+   - Look at sections/1.introduction.tex for language style
+   - Look at tables/*.tex for table formatting
+   - Look at commands/*.tex for macro usage
+4. VERIFY COMMAND TEMPLATES: Command templates (math.tex, general.tex, macros.tex) are pre-copied to paper_draft/commands/
+
+CRITICAL: Reference example papers for FORMATTING and LANGUAGE STYLE only.
+Do NOT copy content, phrasing, or narrative structure from the example papers.
+The examples are in a different research domain - focus only on presentation style.
+
+════════════════════════════════════════════════════════════════════════════════
+                            EXPERIMENT REPORT
+════════════════════════════════════════════════════════════════════════════════
+
+# REPORT
+
+## 1. Executive Summary
+This project tested whether hidden states in different MLP layers are largely unrelated or instead retain measurable shared structure because each layer can only transform representations incrementally. The answer from this controlled benchmark is that MLP hidden spaces are not totally different: adjacent layers were more similar than distant layers in every dataset-metric comparison, and later layers generally improved linearly decodable task information.
+
+The practical implication is that layer-wise comparison in plain MLPs is meaningful, but metric choice matters. CKA, SVCCA, and PWCCA gave a stable “progressive transformation” story; cosine and some cross-seed comparisons were weaker, especially on CIFAR-10.
+
+## 2. Research Question &amp; Motivation
+The research question was: are hidden-state spaces in trained MLPs across depth totally different, or do they preserve enough shared structure that we can compare what changes? This matters for interpretability, model surgery, and understanding whether feedforward layers specialize by refining a shared space rather than constructing unrelated feature bases from scratch.
+
+The gap in prior work is that representation-similarity methods are well developed, but controlled empirical studies focused on plain MLPs are less common than analogous analyses for CNNs or transformers. This study fills that gap with a multi-metric benchmark and a decodability sanity check.
+
+## 3. Data Construction
+### Dataset description
+- `mnist`: train [10200, 784], val [1800, 784], test [2000, 784], pixel mean 0.1303, pixel std 0.3077, missing values 0
+- `fashion_mnist`: train [10200, 784], val [1800, 784], test [2000, 784], pixel mean 0.2865, pixel std 0.3539, missing values 0
+- `cifar10`: train [12750, 3072], val [2250, 3072], test [2000, 3072], pixel mean 0.4729, pixel std 0.2512, missing values 0
+
+### Preprocessing
+All datasets were loaded from local Hugging Face `save_to_disk` artifacts. Because PyTorch could not use the available GPUs in this environment, the experiments used stratified CPU-feasible subsets: 12,000 original training examples and 2,000 test examples for MNIST and Fashion-MNIST, and 15,000 training plus 2,000 test examples for CIFAR-10. Images were flattened into vectors, scaled to `[0, 1]`, and split into stratified 85/15 train/validation partitions; the chosen test subset was held out for final evaluation only.
+
+## 4. Methodology
+### Approach
+For each dataset, the same four-hidden-layer ReLU MLP was trained across multiple random seeds with AdamW, dropout, early stopping on validation accuracy, and deterministic seeding. Hidden activations on held-out samples were compared with linear CKA, SVCCA, PWCCA, and sample-wise cosine similarity. Linear probes were then trained on each hidden layer to measure decodable class information by depth.
+
+### Tools and compute
+- Python: `3.12.8`
+- Torch: `2.11.0+cu130`
+- CUDA available: `False`
+- GPU count: `4`
+- Detected hardware via `nvidia-smi`: four RTX A6000 GPUs, but PyTorch fell back to CPU because the installed CUDA 13.0 wheel was not driver-compatible with the host runtime
+- Batch size: `512`
+- Hidden width: `128`
+- Seeds: `[42, 123, 456]`
+
+### Test accuracy
+| dataset | mean | std | min | max |
+| --- | --- | --- | --- | --- |
+| cifar10 | 0.3937 | 0.0033 | 0.39 | 0.3965 |
+| fashion_mnist | 0.8228 | 0.0098 | 0.812 | 0.831 |
+| mnist | 0.927 | 0.0039 | 0.9245 | 0.9315 |
+
+### Best seed per dataset
+- `cifar10` best test accuracy: 0.3965 (seed 123, train time 4.3s)
+- `fashion_mnist` best test accuracy: 0.8310 (seed 123, train time 2.4s)
+- `mnist` best test accuracy: 0.9315 (seed 456, train time 1.8s)
+
+## 5. Results
+### Adjacent vs distant within-model similarity
+Adjacent-layer similarity exceeded non-adjacent similarity in 12/12 dataset-metric comparisons, with 10/12 reaching `p &lt; 0.05`.
+
+| dataset | metric | adjacent_mean | non_adjacent_mean | difference | p_value |
+| --- | --- | --- | --- | --- | --- |
+| cifar10 | cka | 0.954 | 0.8335 | 0.1206 | 0.0002 |
+| cifar10 | cosine | 0.3334 | 0.2885 | 0.0449 | 0.004799 |
+| cifar10 | pwcca | 0.9361 | 0.9004 | 0.0357 | 0.0002 |
+| cifar10 | svcca | 0.7674 | 0.7305 | 0.0369 | 0.032194 |
+| fashion_mnist | cka | 0.9703 | 0.9028 | 0.0674 | 0.0002 |
+| fashion_mnist | cosine | 0.4166 | 0.4063 | 0.0103 | 0.227954 |
+| fashion_mnist | pwcca | 0.9591 | 0.9254 | 0.0338 | 0.0002 |
+| fashion_mnist | svcca | 0.7499 | 0.6841 | 0.0658 | 0.0002 |
+| mnist | cka | 0.9793 | 0.9253 | 0.054 | 0.0002 |
+| mnist | cosine | 0.478 | 0.4636 | 0.0144 | 0.063387 |
+| mnist | pwcca | 0.94 | 0.9161 | 0.0239 | 0.0002 |
+| mnist | svcca | 0.7271 | 0.6591 | 0.068 | 0.0002 |
+
+### Cross-seed same-depth vs off-depth similarity
+Same-depth cross-seed similarity exceeded off-depth similarity in 8/12 comparisons, with 5/12 reaching `p &lt; 0.05`.
+
+| dataset | metric | same_depth_mean | off_depth_mean | difference | p_value |
+| --- | --- | --- | --- | --- | --- |
+| cifar10 | cka | 0.9359 | 0.8576 | 0.0783 | 0.0008 |
+| cifar10 | cosine | 0.3211 | 0.302 | 0.0191 | 0.4993 |
+| cifar10 | pwcca | 0.8878 | 0.8887 | -0.001 | 0.623675 |
+| cifar10 | svcca | 0.6715 | 0.7018 | -0.0303 | 0.119376 |
+| fashion_mnist | cka | 0.916 | 0.8777 | 0.0383 | 0.037792 |
+| fashion_mnist | cosine | 0.4051 | 0.4137 | -0.0086 | 0.426515 |
+| fashion_mnist | pwcca | 0.9411 | 0.9254 | 0.0158 | 0.139972 |
+| fashion_mnist | svcca | 0.6954 | 0.6761 | 0.0193 | 0.0018 |
+| mnist | cka | 0.956 | 0.9234 | 0.0326 | 0.0014 |
+| mnist | cosine | 0.4562 | 0.4696 | -0.0134 | 0.457908 |
+| mnist | pwcca | 0.9166 | 0.9078 | 0.0089 | 0.358328 |
+| mnist | svcca | 0.6818 | 0.6568 | 0.025 | 0.0014 |
+
+### Linear probe accuracy by layer
+- `cifar10`: best probe at layer 3 with mean accuracy 0.4292, versus layer 1 at 0.4100
+- `fashion_mnist`: best probe at layer 4 with mean accuracy 0.8450, versus layer 1 at 0.8308
+- `mnist`: best probe at layer 4 with mean accuracy 0.9108, versus layer 1 at 0.8767
+
+| dataset | layer | mean | std |
+| --- | --- | --- | --- |
+| cifar10 | 1 | 0.41 | 0.0198 |
+| cifar10 | 2 | 0.4183 | 0.0123 |
+| cifar10 | 3 | 0.4292 | 0.0038 |
+| cifar10 | 4 | 0.4217 | 0.008 |
+| fashion_mnist | 1 | 0.8308 | 0.0038 |
+| fashion_mnist | 2 | 0.8308 | 0.0126 |
+| fashion_mnist | 3 | 0.845 | 0.0075 |
+| fashion_mnist | 4 | 0.845 | 0.0043 |
+| mnist | 1 | 0.8767 | 0.0166 |
+| mnist | 2 | 0.905 | 0.0025 |
+| mnist | 3 | 0.9083 | 0.0058 |
+| mnist | 4 | 0.9108 | 0.0014 |
+
+### Output locations
+- `results/model_metrics.csv`
+- `results/within_model_similarity.csv`
+- `results/cross_seed_similarity.csv`
+- `results/probe_accuracy.csv`
+- `results/summary.json`
+- `figures/`
+
+## 6. Analysis &amp; Discussion
+The strongest pattern is within-model locality. Across all 12 dataset-metric combinations, adjacent hidden layers were more similar than non-adjacent ones, and 10 of those 12 comparisons were significant at `p &lt; 0.05`. The two weaker cases were cosine on MNIST and Fashion-MNIST, where the effect was still positive but small, which is consistent with cosine being less stable as a global representation measure.
+
+Cross-seed results were more mixed. CKA and SVCCA generally showed same-depth alignment, especially on MNIST and Fashion-MNIST, but cosine was inconsistent and CIFAR-10 produced weak or negative same-depth effects for PWCCA and SVCCA. That matters: it suggests “layers are comparable” is a stronger claim within one trained model than across independent initializations, and the answer depends on which invariances a metric encodes.
+
+Linear probes provide the task-information sanity check. On MNIST, probe accuracy improved from 0.8767 at layer 1 to 0.9108 at layer 4; on Fashion-MNIST, the best probe performance appeared at layers 3-4; on CIFAR-10, the best mean probe was at layer 3. This supports the interpretation that later layers refine decodable information while retaining substantial similarity to earlier ones rather than inhabiting wholly unrelated spaces.
+
+## 7. Limitations
+This is a controlled study of plain feedforward MLPs on image classification after flattening pixels, so the conclusions should not be generalized directly to architectures with residual connections, attention, or convolutional inductive bias. The runtime environment also prevented GPU-backed PyTorch, which forced moderate dataset subsampling. SVCCA and PWCCA can be numerically sensitive, and every similarity metric compresses rich geometry into a scalar summary.
+
+## 8. Conclusions &amp; Next Steps
+The evidence answers the research question in the negative: MLP hidden spaces across layers are not totally different. They preserve substantial shared structure, especially between adjacent layers, while still changing enough with depth to improve decodable task information.
+
+The next step would be to add functional tests such as layer stitching and to vary width and depth systematically to determine when progressive similarity breaks down. Another useful follow-up is to compare pre-activation and post-activation spaces and to repeat the study with residual networks or transformers, where layer-to-layer continuity may behave differently.
+
+## References
+- Raghu et al., *SVCCA: Singular Vector Canonical Correlation Analysis for Deep Learning Dynamics and Interpretability* (2017)
+- Kornblith et al., *Similarity of Neural Network Representations Revisited* (2019)
+- Csiszárik et al., *Similarity and Matching of Neural Network Representations* (2021)
+- Davari et al., *Reliability of CKA as a Similarity Measure in Deep Learning* (2022)
+- Jiang et al., *Tracing Representation Progression: Analyzing and Enhancing Layer-Wise Similarity* (2024)
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            RESEARCH PLAN
+════════════════════════════════════════════════════════════════════════════════
+
+# Research Plan: How Similar Are MLP Hidden States to Each Other?
+
+## Motivation &amp; Novelty Assessment
+
+### Why This Research Matters
+Layer-wise hidden-state similarity matters because many interpretability, pruning, and transfer claims assume that intermediate representations evolve gradually rather than being completely rewritten at every layer. If plain MLPs already preserve substantial structure across depth, that supports the view that representational change is constrained and measurable, which is useful for theory, diagnostics, and lightweight model editing.
+
+### Gap in Existing Work
+The gathered literature shows strong methodology for representation comparison, but most recent empirical work emphasizes CNNs and transformers rather than controlled plain-MLP studies. There is also a repeated warning that no single similarity metric is sufficient, yet many studies still rely on one geometric score without checking whether task-relevant information is preserved.
+
+### Our Novel Contribution
+This project runs a controlled, multi-metric study on plain feedforward MLPs across three standard image benchmarks. The main contribution is a combined analysis of within-model layer similarity, cross-seed same-depth similarity, and per-layer linear decodability, allowing us to ask not only whether layers are geometrically similar, but also what representational properties change with depth.
+
+### Experiment Justification
+- Experiment 1: Train matched MLPs on MNIST, Fashion-MNIST, and CIFAR-10 to establish whether adjacent layers are consistently more similar than distant layers across tasks of increasing difficulty.
+- Experiment 2: Compare hidden states with linear CKA, SVCCA, PWCCA, and sample-wise cosine similarity to test whether conclusions are metric-stable rather than artifacts of one similarity definition.
+- Experiment 3: Measure cross-seed same-depth similarity to test whether layer roles recur across random initializations.
+- Experiment 4: Train linear probes on each hidden layer to determine whether deeper layers differ mainly by improving decodable task information rather than by becoming wholly unrelated spaces.
+
+## Research Question
+Are hidden-state spaces in different layers of trained MLPs substantially shared rather than totally different, and if so, what measurable properties change across depth?
+
+## Background and Motivation
+Prior work suggests that nearby layers in neural networks often remain correlated, while deeper layers become more task-specialized. For plain MLPs, however, there is still room for a clean controlled benchmark that separates geometric similarity from task decodability and checks whether conclusions hold across multiple metrics and datasets.
+
+## Hypothesis Decomposition
+- H1: Adjacent hidden layers within a trained MLP are more similar than layers separated by larger depth gaps.
+- H2: The monotonic decline with layer distance is visible across multiple similarity metrics, not only one.
+- H3: Same-depth hidden layers from different random seeds are more similar than mismatched depths, indicating recurring functional roles.
+- H4: Deeper layers improve linear probe accuracy even when geometric similarity to earlier layers remains non-trivial.
+- Alternative explanation A: Similarity trends are artifacts of activation dimensionality or normalization rather than representational continuity.
+- Alternative explanation B: A single metric may overstate similarity; this is why probes and multiple metrics are included.
+
+## Proposed Methodology
+
+### Approach
+Train the same MLP architecture on three image datasets converted to flat vectors, extract hidden activations on held-out data, and compare every pair of hidden layers using several representation similarity measures. Complement geometric comparisons with per-layer linear probes and cross-seed comparisons so the analysis can distinguish “same space,” “compatible information,” and “same functional role.”
+
+### Experimental Steps
+1. Load local datasets from `datasets/`, validate schema differences, and normalize flattened inputs.
+2. Train a fixed-depth ReLU MLP with dropout and early stopping for multiple seeds on each dataset.
+3. Save hidden activations for a fixed held-out subset and compute pairwise within-model similarity matrices.
+4. Aggregate similarity by layer distance and compare adjacent versus non-adjacent layers statistically.
+5. Compute cross-seed same-depth and mismatched-depth similarities.
+6. Train linear probes on each hidden layer and compare depth against probe accuracy.
+7. Summarize results with tables, heatmaps, and statistical tests in `REPORT.md`.
+
+### Baselines
+- Sample-wise cosine similarity between paired activations.
+- SVCCA.
+- PWCCA.
+- Linear CKA.
+- Final-layer classifier performance as the task-performance reference.
+- Earlier-layer linear probes as task-information baselines.
+
+### Evaluation Metrics
+- Test accuracy of each trained MLP.
+- Pairwise hidden-layer similarity matrices for each metric.
+- Mean similarity as a function of layer distance.
+- Cross-seed same-depth versus off-depth similarity gap.
+- Linear probe accuracy by depth.
+- Correlation between probe accuracy and similarity to the final hidden layer.
+
+### Statistical Analysis Plan
+- Null hypothesis H0a: Adjacent-layer similarity is not higher than non-adjacent-layer similarity.
+- Null hypothesis H0b: Same-depth cross-seed similarity is not higher than mismatched-depth similarity.
+- Use paired permutation or paired t-tests across trained models where sample counts permit.
+- Report mean differences, 95% confidence intervals from bootstrap resampling, and Cohen&#39;s d where appropriate.
+- Significance level: 0.05, with Benjamini-Hochberg correction across metric families if multiple related tests are reported together.
+
+## Expected Outcomes
+Support for the hypothesis would look like consistently high adjacent-layer similarity, a smooth decline with layer distance, and a rise in linear probe performance with depth rather than a collapse into unrelated spaces. Refutation would require weak or unstable adjacent-layer similarity and no consistent cross-seed layer alignment.
+
+## Timeline and Milestones
+1. Planning and environment validation: completed first.
+2. Dataset loading and script scaffolding: immediate next step.
+3. Training and activation extraction: primary runtime phase.
+4. Similarity/probe analysis and visualization: after successful model runs.
+5. Documentation and validation: final phase.
+
+## Potential Challenges
+- CIFAR-10 may be relatively weak for plain MLPs; if needed, keep the same architecture but allow slightly longer training while documenting the limitation.
+- SVCCA/PWCCA can be numerically brittle; activations will be centered, downsampled consistently, and wrapped with error handling.
+- Metric values may disagree; this is treated as a result, not an implementation failure.
+
+## Success Criteria
+- Reproducible training and evaluation scripts run end-to-end in the local `.venv`.
+- Results are produced for at least MNIST and Fashion-MNIST, with CIFAR-10 included unless a documented resource issue blocks it.
+- The final report contains actual similarity matrices, aggregated statistics, probe results, and a clear answer to the research question.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          LITERATURE REVIEW
+════════════════════════════════════════════════════════════════════════════════
+
+# Literature Review
+
+## Research Area Overview
+
+This project sits at the intersection of representation analysis and neural network interpretability. The central question is whether hidden states from different MLP layers are largely distinct or whether they retain measurable shared structure because each layer only incrementally transforms the representation. The literature strongly suggests that hidden representations are often neither identical nor unrelated: nearby layers tend to remain correlated, deeper layers become more task-specific, and conclusions depend heavily on which similarity metric is used.
+
+## Search Keywords
+
+- MLP hidden state similarity
+- layer-wise representation similarity
+- SVCCA neural networks
+- CKA hidden layer comparison
+- neural representation matching
+- functional similarity model stitching
+- decodable information representation similarity
+
+## Key Papers
+
+### 1. SVCCA: Singular Vector Canonical Correlation Analysis for Deep Learning Dynamics and Interpretability
+- **Authors**: Maithra Raghu, Justin Gilmer, Jason Yosinski, Jascha Sohl-Dickstein
+- **Year**: 2017
+- **Source**: NeurIPS 2017 / arXiv `1706.05806`
+- **Key Contribution**: Introduces SVCCA for comparing hidden representations across layers, checkpoints, and models while being robust to affine transformations.
+- **Methodology**: Applies SVD to retain dominant directions, then CCA to compare the resulting subspaces.
+- **Datasets Used**: CIFAR-10, toy regression, language-model settings, and ImageNet-based interpretability examples.
+- **Results**: Finds that lower layers converge earlier, learned representations are often lower-dimensional than layer width suggests, and class sensitivity emerges progressively.
+- **Code Available**: Yes, `google/svcca`.
+- **Relevance to Our Research**: This is the most natural baseline for an MLP hidden-state study because it directly compares internal subspaces, not just per-neuron correspondence.
+
+### 2. Similarity of Neural Network Representations Revisited
+- **Authors**: Simon Kornblith, Mohammad Norouzi, Honglak Lee, Geoffrey Hinton
+- **Year**: 2019
+- **Source**: ICML 2019 / arXiv `1905.00414`
+- **Key Contribution**: Shows why CCA-style measures can fail in high-dimensional settings and argues for CKA as a better representation-level similarity metric.
+- **Methodology**: Theoretical analysis of invariance properties plus empirical correspondence tests across trained networks.
+- **Datasets Used**: CIFAR-10 and Transformer encoder sanity checks.
+- **Results**: Linear and RBF CKA recover matching layers far better than CCA/SVCCA in their correspondence benchmark.
+- **Code Available**: Reference code linked from the project page; several community implementations exist.
+- **Relevance to Our Research**: Strong metric choice paper. If the goal is a layer-by-layer similarity matrix for trained MLPs, CKA should be one of the default comparisons.
+
+### 3. Similarity and Matching of Neural Network Representations
+- **Authors**: Adrián Csiszárik, Péter Kőrösi-Szabó, Ákos K. Matszangosz, Gergely Papp, Dániel Varga
+- **Year**: 2021
+- **Source**: NeurIPS 2021 / arXiv `2110.14633`
+- **Key Contribution**: Distinguishes representational similarity from functional similarity through model stitching.
+- **Methodology**: Connects one model’s intermediate activations into another model using affine stitching layers and evaluates task performance.
+- **Datasets Used**: Vision benchmarks with convolutional models.
+- **Results**: Functionally compatible representations can exist even when geometric similarity scores are not obviously large.
+- **Code Available**: Not identified during this pass.
+- **Relevance to Our Research**: Important warning that geometry alone is not the full story. For MLPs, a small stitching experiment between layers or seeds would be a valuable extension.
+
+### 4. Reliability of CKA as a Similarity Measure in Deep Learning
+- **Authors**: MohammadReza Davari, Stefan Horoi, Amine Natik, Guillaume Lajoie, Guy Wolf, Eugene Belilovsky
+- **Year**: 2022
+- **Source**: ICLR 2023 poster / arXiv `2210.16156`
+- **Key Contribution**: Shows that CKA can be sensitive to outliers and certain simple transformations, even when useful task information is preserved.
+- **Methodology**: Theoretical characterization plus empirical manipulation of representations and linear probe analyses.
+- **Datasets Used**: CIFAR-10 and vision transformer settings.
+- **Results**: High CKA can appear in cases where feature usefulness differs, especially in early layers; CKA values can be manipulated without strongly changing final behavior.
+- **Code Available**: Not identified in this pass.
+- **Relevance to Our Research**: Essential caveat paper. It argues against trusting a single metric and supports combining CKA with probes, stitching, or classifier transfer.
+
+### 5. Similarity of Neural Network Models: A Survey of Functional and Representational Measures
+- **Authors**: Max Klabunde, Tobias Schumacher, Markus Strohmaier, Florian Lemmerich
+- **Year**: 2023
+- **Source**: Survey / arXiv `2305.06329`
+- **Key Contribution**: Organizes the space of representational and functional similarity measures and summarizes known tradeoffs.
+- **Methodology**: Literature survey spanning more than thirty measures and multiple application settings.
+- **Datasets Used**: Survey paper, not a single benchmark contribution.
+- **Results**: Clarifies that different measures encode different invariances and answer different scientific questions.
+- **Code Available**: Not central.
+- **Relevance to Our Research**: Useful framing document for explaining why this project should report more than one similarity notion.
+
+### 6. Tracing Representation Progression: Analyzing and Enhancing Layer-Wise Similarity
+- **Authors**: Jiachen Jiang, Jinxin Zhou, Zhihui Zhu
+- **Year**: 2024
+- **Source**: arXiv `2406.14479`
+- **Key Contribution**: Recent evidence that hidden representations across layers are positively correlated and become more similar as layer distance decreases.
+- **Methodology**: Uses sample-wise cosine similarity, compares it against CKA, studies layer-wise classifier transfer and aligned training.
+- **Datasets Used**: CIFAR-10, ImageNet-1K, and NLP tasks on transformers.
+- **Results**: Nearby layers are more similar; stronger similarity correlates with more stable predictions and better shallow-layer reuse.
+- **Code Available**: Not identified during this pass.
+- **Relevance to Our Research**: Although transformer-focused, its main empirical claim is directly aligned with the hypothesis here: layer transitions are often incremental, not arbitrary.
+
+### 7. What Representational Similarity Measures Imply about Decodable Information
+- **Authors**: Sarah E. Harvey, David Lipshutz, Alex H. Williams
+- **Year**: 2024
+- **Source**: UniReps 2024 / arXiv `2411.08197`
+- **Key Contribution**: Interprets common similarity measures through the lens of linear decoding.
+- **Methodology**: Theoretical analysis linking CKA, CCA, and Procrustes-style distances to alignment between optimal linear readouts.
+- **Datasets Used**: Theory-heavy paper rather than a benchmark-focused one.
+- **Results**: Similar geometry often implies alignment of downstream linear decoders, but only under explicit assumptions.
+- **Code Available**: Not central.
+- **Relevance to Our Research**: Useful for motivating linear-probe checks on each hidden layer in addition to pairwise similarity scores.
+
+## Common Methodologies
+
+- **SVCCA / PWCCA**: Compare low-dimensional subspaces after removing noisy directions.
+- **CKA**: Compare representational similarity matrices or feature kernels; useful for correspondence heatmaps.
+- **Sample-wise cosine similarity**: Cheap metric for within-model adjacent-layer analysis.
+- **Model stitching**: Tests functional compatibility instead of only geometry.
+- **Linear probes / transferred classifiers**: Measure whether similar hidden states preserve decodable task information.
+
+## Standard Baselines
+
+- **SVCCA**: Foundational baseline, especially for subspace-level comparison.
+- **Linear CKA**: Strong default for high-dimensional representation comparison.
+- **PWCCA**: Variant that weights canonical directions by contribution.
+- **Cosine similarity between paired activations**: Good lightweight baseline for nearby layers.
+- **Linear probe accuracy**: Not a similarity metric, but an essential sanity check on representation usefulness.
+
+## Evaluation Metrics
+
+- **Pairwise layer similarity matrix**: Main output for comparing all hidden layers with one another.
+- **Adjacent-layer similarity trend**: Tests whether similarity decreases smoothly with layer distance.
+- **Cross-seed similarity**: Checks whether learned geometry is stable across random initializations.
+- **Linear probe accuracy per layer**: Measures task information at each depth.
+- **Classifier transfer from final layer to earlier layers**: Useful if testing decodable-information claims.
+
+## Datasets in the Literature and Recommended Benchmarks
+
+- **MNIST**: Best low-cost starting point for dense MLPs.
+- **Fashion-MNIST**: Same shape as MNIST but more semantically difficult.
+- **CIFAR-10**: Harder benchmark that can reveal whether similarity patterns survive under weaker MLP inductive bias.
+
+These three benchmarks are enough to test whether hidden-state similarity trends are stable across difficulty levels.
+
+## Gaps and Opportunities
+
+- Most recent layer-similarity work emphasizes transformers, not plain MLPs.
+- Functional similarity tests such as stitching are less common in simple feedforward MLP studies and would be a worthwhile extension.
+- Metric sensitivity remains a real issue, so conclusions should not rely on one score alone.
+- There is room for a clean controlled study where architecture, optimizer, width, and dataset difficulty are varied systematically in plain MLPs.
+
+## Recommendations for Our Experiment
+
+- **Recommended datasets**: Start with `MNIST` and `Fashion-MNIST`, then validate on `CIFAR-10`.
+- **Recommended baselines**: Linear CKA, SVCCA, PWCCA, and sample-wise cosine similarity.
+- **Recommended metrics**: Pairwise hidden-layer similarity matrices, similarity versus layer distance, and linear probe accuracy per layer.
+- **Methodological considerations**:
+  - Train multiple seeds per architecture.
+  - Compare both within-model layer pairs and cross-model same-depth pairs.
+  - Normalize hidden activations consistently before similarity analysis.
+  - Interpret CKA with caution and pair it with either linear probes or simple stitching.
+  - Record width and depth explicitly, because similarity behavior changes with overparameterization.
+
+
+════════════════════════════════════════════════════════════════════════════════
+                          PAPER REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+Generate a complete academic paper with the following structure:
+
+1. TITLE
+   - Clear, specific, informative
+   - Should convey main finding or contribution
+
+2. AUTHOR
+   - Use this exact author line in the \author{} block: Ari Holtzman and NeuriCo
+
+3. ABSTRACT (150-250 words)
+   - Problem statement
+   - Approach
+   - Key results
+   - Significance
+
+4. INTRODUCTION
+   - Research problem and motivation
+   - Gap in existing work
+   - Our contribution (be specific)
+   - Paper organization
+
+5. RELATED WORK
+   - Organized by theme/approach
+   - Position our work relative to prior work
+   - Cite papers from literature review
+
+6. METHODOLOGY
+   - Clear description of approach
+   - Experimental setup
+   - Datasets used
+   - Evaluation metrics
+   - Baselines
+
+7. RESULTS
+   - Present results with tables and figures
+   - Statistical analysis
+   - Comparison to baselines
+   - Ablation studies (if applicable)
+
+8. DISCUSSION
+   - Interpretation of results
+   - Limitations
+   - Broader implications
+
+9. CONCLUSION
+   - Summary of contributions
+   - Key findings
+   - Future work
+
+10. REFERENCES
+   - BibTeX format
+   - All cited papers
+
+════════════════════════════════════════════════════════════════════════════════
+                          OUTPUT FORMAT
+════════════════════════════════════════════════════════════════════════════════
+
+Create a MODULAR LaTeX project with the following directory structure:
+
+paper_draft/
+├── main.tex              # Main file that imports all sections
+├── references.bib        # BibTeX references
+├── sections/
+│   ├── abstract.tex      # Abstract content
+│   ├── introduction.tex  # Introduction section
+│   ├── related_work.tex  # Related work section
+│   ├── methodology.tex   # Methodology section
+│   ├── results.tex       # Results section
+│   ├── discussion.tex    # Discussion section
+│   └── conclusion.tex    # Conclusion section
+├── figures/              # Directory for any generated figures
+├── tables/               # Directory for complex standalone tables
+└── appendix/             # Directory for appendix sections (if needed)
+
+INSTRUCTIONS:
+1. First, create the directory structure above (mkdir -p paper_draft/sections paper_draft/figures paper_draft/tables paper_draft/appendix)
+2. Write main.tex using the EXACT preamble for NEURIPS:
+
+   \documentclass{article}
+   \usepackage[final]{neurips_2025}  % NEURIPS style (neurips_2025.sty is in paper_draft/)
+   \usepackage[hidelinks]{hyperref}  % REQUIRED: clickable links
+   \usepackage{booktabs}  % REQUIRED: professional tables
+   \usepackage{graphicx}
+   \usepackage{amsmath,amssymb}
+
+   % Import command files
+   \input{commands/math}
+   \input{commands/general}
+   \input{commands/macros}
+
+   % Use this bibliography style:
+   \bibliographystyle{plainnat}
+
+   \author{Ari Holtzman and NeuriCo}
+
+   - Use \input{sections/...} to include each section
+   - Use \bibliography{references} for references
+3. Write each section file with COMPLETE content (no placeholders)
+4. Each section file should include its \section{} command
+5. Write references.bib with all citations in BibTeX format
+6. After writing all files, compile the paper:
+   cd paper_draft && pdflatex -interaction=nonstopmode main.tex && bibtex main && pdflatex -interaction=nonstopmode main.tex && pdflatex -interaction=nonstopmode main.tex
+
+This modular structure allows humans to easily:
+- Edit individual sections without navigating a large file
+- Track changes per section
+- Reuse sections across different paper versions
+
+════════════════════════════════════════════════════════════════════════════════
+                          QUALITY REQUIREMENTS
+════════════════════════════════════════════════════════════════════════════════
+
+- Academic tone throughout
+- All claims must be supported by data from the experiment report
+- Proper citations using \cite{} commands
+- Clear figures and tables with proper captions
+- NO placeholder text - every section must have real content
+- The paper MUST compile without errors
+- If compilation fails, debug and fix the LaTeX errors
+
+════════════════════════════════════════════════════════════════════════════════
+                          LAB WRITING STYLE
+════════════════════════════════════════════════════════════════════════════════
+
+Follow these lab-specific conventions to match our paper style:
+
+1. LANGUAGE STYLE:
+   - Use active voice: "We propose", "We examine", "We focus on"
+   - Be direct and confident: "Our main question is...", "We hypothesize that..."
+   - State things clearly and simply - prefer plain language over jargon
+   - Use bold questions as paragraph organizers: {\bf what is X?}
+   - Include specific quantitative claims: "8.97% over baseline"
+   - Avoid fancy wording: "utilize" → "use", "facilitate" → "help"
+
+2. INTRODUCTION STRUCTURE:
+   - Engaging hook (get to the point quickly)
+   - Problem importance
+   - Gap identification
+   - Your approach with method figure reference
+   - Quantitative preview of results
+   - Contribution bullets (3-4 items, action verbs)
+
+3. CONTRIBUTION LISTS:
+   \begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+       \item We propose...
+       \item We conduct...
+       \item We complement...
+   \end{itemize}
+
+4. MODULAR COMMANDS STRUCTURE:
+   Command templates are pre-copied to paper_draft/commands/:
+   - math.tex: Math notation macros
+   - general.tex: Formatting macros
+   - macros.tex: Project-specific term definitions (customize this for your paper)
+
+   In main.tex, include:
+   \input{commands/math}
+   \input{commands/general}
+   \input{commands/macros}
+
+5. REFERENCE CONVENTIONS:
+   Use reference macros from math.tex:
+   - \figref{fig:name} for "figure 1" (lowercase, in-sentence)
+   - \Figref{fig:name} for "Figure 1" (capitalized, start of sentence)
+   - \secref{sec:name} for "section 2"
+
+6. TEXT FORMATTING:
+   - Use \para{Header text} for bold paragraph headers
+   - Define method/dataset names with \textsc and \xspace:
+     \newcommand{\methodname}{\textsc{MethodName}\xspace}
+
+7. TABLE FORMATTING:
+   - Use booktabs package (no vertical lines)
+   - Use \resizebox{\textwidth}{!}{...} for wide tables
+   - Use @{} to remove padding at table edges
+   - Use \cmidrule(lr){x-y} for sub-headers
+   - Use \textsc{} for dataset/method names in headers
+   - Bold best results with {\bf ...}
+
+8. FIGURE FORMATTING:
+   - Use 0.32\textwidth for 3-column subfigures
+   - Use 0.95\linewidth for full-width figures
+   - Use \input{figures/legend} for shared legends
+   - Write self-contained captions explaining key observations
+
+9. RESULTS PRESENTATION:
+   - Define \increase and \decrease for colored arrows (green up, red down)
+   - Bold best results in tables
+   - Report confidence intervals when available
+
+10. ALGORITHM STYLING:
+    - Use algpseudocode with [noend]
+    - Use \triangleright for comments
+
+11. HYPERLINKS (REQUIRED):
+    - Always use \usepackage[hidelinks]{hyperref} or with colored links
+    - All citations, section refs, figure refs, table refs must be clickable
+    - This is essential for reader navigation
+
+════════════════════════════════════════════════════════════════════════════════
+                          WORKFLOW: REVIEW AND REFLECT
+════════════════════════════════════════════════════════════════════════════════
+
+Before calling finish, you MUST complete these review steps:
+
+1. REVIEW RESOURCES (at the start):
+   - Read .codex/skills/paper-writer/SKILL.md for detailed guidance
+   - Study templates/paper_writing/lab_style_guide.md for style conventions
+   - Browse paper_examples/ for formatting and language patterns
+
+2. SELF-REFLECTION (before finishing):
+   After writing all sections, review your work against these criteria:
+
+   LANGUAGE CHECK:
+   - [ ] Is the writing clear and jargon-free?
+   - [ ] Are claims specific with quantitative support?
+   - [ ] Is active voice used throughout?
+
+   FORMATTING CHECK:
+   - [ ] Does main.tex include \input{commands/math}, \input{commands/general}, \input{commands/macros}?
+   - [ ] Is hyperref package included for clickable references?
+   - [ ] Do tables use booktabs (no vertical lines)?
+   - [ ] Are best results bolded in tables?
+   - [ ] Are figures/tables properly captioned?
+
+   STRUCTURE CHECK:
+   - [ ] Does introduction follow: hook → importance → gap → approach → preview → contributions?
+   - [ ] Are contribution bullets specific with action verbs?
+   - [ ] Does the paper compile without errors?
+
+3. FIX ISSUES:
+   - Address any issues found in the self-reflection
+   - Re-compile and verify the PDF looks correct
+
+Only after completing this review should you consider the paper finished.

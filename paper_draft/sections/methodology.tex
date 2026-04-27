@@ -1,0 +1,16 @@
+\section{Methodology}
+\label{sec:methodology}
+
+\para{Research question and hypotheses.} We ask whether hidden-state spaces in different layers of a trained MLP are largely shared rather than totally different, and if they are shared, what changes measurably across depth. We test four hypotheses: adjacent layers should be more similar than distant layers; this distance effect should appear across multiple metrics; the same hidden depth should recur more strongly across seeds than mismatched depths; and later layers should improve linear decodability without collapsing into unrelated spaces.
+
+\para{Datasets and preprocessing.} We use \mnist, \fashionmnist, and \cifar, loaded from local Hugging Face \texttt{save\_to\_disk} artifacts. Because the installed PyTorch build could not use the available GPUs, we ran CPU-feasible stratified subsets: 12{,}000 original training examples and 2{,}000 test examples for \mnist and \fashionmnist, and 15{,}000 training plus 2{,}000 test examples for \cifar. We flattened images into vectors, scaled pixel values to $[0,1]$, and split the training subset into stratified 85/15 train/validation partitions. The resulting train/validation/test shapes are $10{,}200/1{,}800/2{,}000$ for \mnist and \fashionmnist, and $12{,}750/2{,}250/2{,}000$ for \cifar. All datasets had zero missing values.
+
+\para{Model and optimization.} For every dataset we trained the same four-hidden-layer ReLU MLP with hidden width $128$, dropout, AdamW optimization, batch size $512$, early stopping on validation accuracy, and deterministic seeding. We used three random seeds: $42$, $123$, and $456$. The software environment was Python $3.12.8$ with PyTorch $2.11.0{+}\texttt{cu130}$. Four RTX A6000 GPUs were visible to the host, but \texttt{torch.cuda.is\_available()} was false, so all training and evaluation ran on CPU.
+
+\para{Representation similarity metrics.} We compare hidden activations with four metrics chosen to cover different invariances. Linear \cka measures similarity between centered feature kernels \cite{kornblith2019similarity}. \svcca and \pwcca compare dominant subspaces and canonical directions \cite{raghu2017svcca}. Sample-wise cosine similarity provides a simpler activation-level baseline. Using this set reduces the chance that a single metric artifact drives the main conclusion.
+
+\para{Comparison design.} We evaluate two kinds of alignment. First, within each trained model we compare all hidden-layer pairs and aggregate them into adjacent pairs $(1,2)$, $(2,3)$, $(3,4)$ and non-adjacent pairs $(1,3)$, $(1,4)$, $(2,4)$. This tests whether similarity declines with layer distance. Second, across seeds we compare same-depth pairs against off-depth pairs to test whether layer roles recur across independent initializations. We report mean differences, permutation-test $p$-values, and Cohen's $d$ from the result summary.
+
+\para{Linear probes.} To track task information by depth, we train a linear classifier on each hidden layer and measure held-out accuracy. These probes do not claim full functional equivalence, but they provide a direct sanity check on whether deeper layers preserve or improve decodable label information.
+
+\input{tables/model_accuracy}
